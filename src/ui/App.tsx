@@ -4,7 +4,8 @@ import type { Candidate, Lexicon, PerfectIndex, TailIndex } from '../engine/type
 import RhymeResultList from './components/RhymeResultList';
 
 // Constants
-const ARTIFACTS_PATH = '/artifacts'; // Files in public/artifacts are served at root
+const BASE_URL = import.meta.env.BASE_URL || '/';
+const ARTIFACTS_PATH = `${BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/'}artifacts`;
 
 interface DictionaryState {
   loading: boolean;
@@ -28,19 +29,28 @@ function App() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [lexiconRes, perfectRes, tailRes] = await Promise.all([
-          fetch(`${ARTIFACTS_PATH}/lexicon.json`),
-          fetch(`${ARTIFACTS_PATH}/index_perfect.json`),
-          fetch(`${ARTIFACTS_PATH}/index_tail.json`),
-        ]);
+        console.log(`Fetching dictionary from: ${ARTIFACTS_PATH}`);
 
-        if (!lexiconRes.ok || !perfectRes.ok || !tailRes.ok) {
-          throw new Error("Failed to load one or more dictionary files.");
-        }
+        const fetchResource = async (filename: string) => {
+          const url = `${ARTIFACTS_PATH}/${filename}`;
+          const res = await fetch(url);
+          if (!res.ok) {
+            throw new Error(`Failed to load ${filename}: ${res.status} ${res.statusText}`);
+          }
+          const text = await res.text();
+          try {
+            return JSON.parse(text);
+          } catch (e) {
+            console.error(`JSON parse error for ${filename}. content snippet: ${text.slice(0, 50)}...`);
+            throw new Error(`Invalid JSON in ${filename}: ${(e as Error).message}`);
+          }
+        };
 
-        const lexicon = (await lexiconRes.json()) as Lexicon;
-        const perfectIndex = (await perfectRes.json()) as PerfectIndex;
-        const tailIndex = (await tailRes.json()) as TailIndex;
+        const [lexicon, perfectIndex, tailIndex] = await Promise.all([
+          fetchResource('lexicon.json'),
+          fetchResource('index_perfect.json'),
+          fetchResource('index_tail.json'),
+        ]) as [Lexicon, PerfectIndex, TailIndex];
 
         const engine = new RhymeEngine(lexicon, perfectIndex, tailIndex);
         setDictState({ loading: false, engine, error: null });
