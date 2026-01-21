@@ -1,4 +1,4 @@
-import { List, type RowComponentProps } from 'react-window';
+import { List } from 'react-window';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Candidate } from '../../engine/types';
 
