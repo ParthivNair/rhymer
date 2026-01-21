@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #f0f9ff;
+  --color-brand-100: #e0f2fe;
+  --color-brand-500: #0ea5e9;
+  --color-brand-600: #0284c7;
+  --color-brand-900: #0c4a6e;
+  --font-family-sans: Inter, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    /* @apply is discouraged in v4, but we can stick to standard css or use @apply if configured. 
+       Actually, standard v4 uses native CSS variables or simple classes. 
+       Let's use @apply if it works, or just classes in App.tsx. 
+       The error `Cannot apply unknown utility class` suggests the theme isn't loading or v4 syntax differences.
+       With @tailwindcss/postcss (v4), we use `@import "tailwindcss";` instead of directives. */
+    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+  }
+}
