@@ -1,10 +1,15 @@
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
-import { useEffect, useRef, useState, CSSProperties } from 'react';
+import { List, type RowComponentProps } from 'react-window';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Candidate } from '../../engine/types';
 
 interface RhymeResultListProps {
     candidates: Candidate[];
     layout: 'list' | 'grid';
+}
+
+interface ListData {
+    candidates: Candidate[];
+    numColumns: number;
 }
 
 const GUTTER_SIZE = 8;
@@ -44,8 +49,8 @@ const AutoSizer = ({ children }: { children: (size: { width: number; height: num
     );
 };
 
-const Row = ({ index, style, data }: ListChildComponentProps<{ candidates: Candidate[]; numColumns: number }>) => {
-    const { candidates, numColumns } = data;
+// Row component receives candidates and numColumns directly as props now
+const Row = ({ index, style, candidates, numColumns }: { index: number; style: CSSProperties } & ListData) => {
     const startIndex = index * numColumns;
 
     const items = [];
@@ -107,16 +112,14 @@ export default function RhymeResultList({ candidates, layout }: RhymeResultListP
                     const rowCount = Math.ceil(candidates.length / numColumns);
 
                     return (
-                        <List
-                            height={height}
-                            width={width}
-                            itemCount={rowCount}
-                            itemSize={ITEM_HEIGHT}
-                            itemData={{ candidates, numColumns }}
-                            overscanCount={8} // Render generous buffer
-                        >
-                            {Row}
-                        </List>
+                        <List<ListData>
+                            style={{ width, height }}
+                            rowCount={rowCount}
+                            rowHeight={ITEM_HEIGHT}
+                            rowProps={{ candidates, numColumns }}
+                            overscanCount={8}
+                            rowComponent={Row}
+                        />
                     );
                 }}
             </AutoSizer>
