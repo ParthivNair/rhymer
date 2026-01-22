@@ -107,13 +107,13 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col items-center py-10 px-4 font-mono text-slate-200">
-      <header className="w-full max-w-6xl mb-8 flex justify-between items-end border-b-2 border-slate-700 pb-2">
+      <header className="w-full max-w-6xl mb-8 flex justify-between items-baseline border-b-2 border-slate-700 pb-2">
         <h1 className="text-xl font-bold text-slate-100 flex items-baseline gap-3">
           Rhyme Engine
           <span className="text-xs font-normal text-slate-500">by Parthiv and Gemini</span>
         </h1>
         <div className="text-sm text-slate-400">
-          v0.1.0
+          v0.1.1
         </div>
       </header>
 
