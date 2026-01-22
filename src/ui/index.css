@@ -13,6 +13,13 @@
   body {
     @apply bg-slate-900 text-slate-200 font-sans antialiased;
   }
+
+  /* Mobile Scaling: Scale down the entire UI on small screens to keep desktop look */
+  @media (max-width: 768px) {
+    body {
+      zoom: 0.65;
+    }
+  }
 }
 
 @layer utilities {
