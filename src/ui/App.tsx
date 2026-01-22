@@ -136,9 +136,10 @@ function App() {
       {!dictState.loading && !dictState.error && (
         <div className="w-full max-w-6xl border-2 border-slate-700 flex flex-col h-[80vh]">
           {/* Input Area */}
-          <div className="p-6 border-b-2 border-slate-700 bg-slate-900 shrink-0 flex gap-6">
+          {/* Input Area */}
+          <div className="p-6 border-b-2 border-slate-700 bg-slate-900 shrink-0 flex flex-col-reverse md:flex-row gap-6">
             {/* Left Side: Search */}
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 w-full md:w-auto">
               <div className="flex flex-wrap gap-2 mb-3">
                 {targets.map(t => (
                   <span key={t} className="inline-flex items-center px-3 py-1 text-sm font-medium bg-slate-800 text-slate-200 border border-slate-600">
@@ -165,7 +166,7 @@ function App() {
             </div>
 
             {/* Right Side: Inspiration Tool Placeholder */}
-            <div className="w-1/3 min-w-[250px] border-2 border-dashed border-slate-700 rounded-xl flex items-center justify-center text-slate-600 font-bold tracking-widest text-sm">
+            <div className="w-full md:w-1/3 min-w-[250px] h-32 md:h-auto border-2 border-dashed border-slate-700 rounded-xl flex items-center justify-center text-slate-600 font-bold tracking-widest text-sm shrink-0">
               INSPIRATION TOOL HERE
             </div>
           </div>

@@ -15,10 +15,11 @@
   }
 
   /* Mobile Scaling: Scale down the entire UI on small screens to keep desktop look */
+  /* Reverted zoom scaling to allow for stacked layout */
   @media (max-width: 768px) {
-    body {
-      zoom: 0.65;
-    }
+    /* body {
+       zoom: 0.65;
+    } */
   }
 }
 
