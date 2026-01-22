@@ -106,14 +106,15 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center py-10 px-4">
-      <header className="mb-8 text-center">
-        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
-          Rhyme Engine <span className="text-blue-600">v0</span>
+    <div className="min-h-screen bg-slate-900 flex flex-col items-center py-10 px-4 font-mono text-slate-200">
+      <header className="w-full max-w-6xl mb-8 flex justify-between items-end border-b-2 border-slate-700 pb-2">
+        <h1 className="text-xl font-bold text-slate-100 flex items-baseline gap-3">
+          Rhyme Engine
+          <span className="text-xs font-normal text-slate-500">by Parthiv and Gemini</span>
         </h1>
-        <p className="text-slate-500 max-w-md mx-auto">
-          Deterministic multi-word rhyme finder. Running entirely in your browser.
-        </p>
+        <div className="text-sm text-slate-400">
+          v0.1.0
+        </div>
       </header>
 
       {/* Loading State */}
@@ -133,32 +134,40 @@ function App() {
 
       {/* Main Interface */}
       {!dictState.loading && !dictState.error && (
-        <div className="w-full max-w-6xl bg-white shadow-xl rounded-2xl border border-slate-100 overflow-hidden flex flex-col h-[85vh]">
+        <div className="w-full max-w-6xl border-2 border-slate-700 flex flex-col h-[80vh]">
           {/* Input Area */}
-          <div className="p-6 border-b border-slate-100 bg-slate-50/50 shrink-0">
-            <div className="flex flex-wrap gap-2 mb-3">
-              {targets.map(t => (
-                <span key={t} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-                  {t}
-                  <button onClick={() => removeTarget(t)} className="ml-2 text-blue-400 hover:text-blue-900">
-                    &times;
-                  </button>
-                </span>
-              ))}
+          <div className="p-6 border-b-2 border-slate-700 bg-slate-900 shrink-0 flex gap-6">
+            {/* Left Side: Search */}
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap gap-2 mb-3">
+                {targets.map(t => (
+                  <span key={t} className="inline-flex items-center px-3 py-1 text-sm font-medium bg-slate-800 text-slate-200 border border-slate-600">
+                    {t}
+                    <button onClick={() => removeTarget(t)} className="ml-2 text-slate-400 hover:text-white">
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+
+              <input
+                type="text"
+                className="w-full text-lg px-4 py-3 bg-slate-800 text-slate-100 border-2 border-slate-700 focus:outline-none focus:border-slate-400 transition-colors placeholder-slate-500"
+                placeholder="Type a word and hit Enter (e.g. 'cat', 'bat')"
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                onKeyDown={handleInputKeyDown}
+                autoFocus
+              />
+              <p className="text-xs text-slate-500 mt-2 ml-1">
+                Add multiple words to see separate lists of rhymes for each.
+              </p>
             </div>
 
-            <input
-              type="text"
-              className="w-full text-lg px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow shadow-sm"
-              placeholder="Type a word and hit Enter (e.g. 'cat', 'bat')"
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-              onKeyDown={handleInputKeyDown}
-              autoFocus
-            />
-            <p className="text-xs text-slate-400 mt-2 ml-1">
-              Add multiple words to see separate lists of rhymes for each.
-            </p>
+            {/* Right Side: Inspiration Tool Placeholder */}
+            <div className="w-1/3 min-w-[250px] border-2 border-dashed border-slate-700 rounded-xl flex items-center justify-center text-slate-600 font-bold tracking-widest text-sm">
+              INSPIRATION TOOL HERE
+            </div>
           </div>
 
           {/* Results Area */}
@@ -194,7 +203,7 @@ function App() {
                 >
                   {/* Column Header only if multiple */}
                   {resultSets.length > 1 && (
-                    <div className="mb-2 px-1 text-sm font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 pb-1">
+                    <div className="mb-2 px-1 text-sm font-bold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">
                       Rhymes for "{set.target}"
                     </div>
                   )}
@@ -211,9 +220,9 @@ function App() {
           </div>
 
           {/* Footer Stats */}
-          <div className="px-6 py-2 bg-slate-50 border-t border-slate-100 text-xs text-slate-400 flex justify-between">
+          <div className="px-6 py-2 bg-slate-900 border-t-2 border-slate-700 text-xs text-slate-500 flex justify-between">
             <span>Lexicon: {Object.keys(dictState.engine?.['lexicon'] || {}).length.toLocaleString()} words</span>
-            <span>v0.1.0</span>
+            <span></span>
           </div>
         </div>
       )}

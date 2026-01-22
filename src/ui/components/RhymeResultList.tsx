@@ -74,15 +74,20 @@ const Row = ({ index, style, candidates, numColumns }: { index: number; style: C
             {items.map(({ candidate, index: originalIndex }) => (
                 <div
                     key={candidate.word}
-                    className="flex-1 flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors group bg-white shadow-sm"
+                    className="flex-1 flex items-center justify-between p-3 bg-slate-800 border-2 border-slate-700 hover:border-slate-500 transition-colors group"
                 >
                     <div className="flex items-baseline space-x-2 overflow-hidden">
-                        <span className="text-slate-400 text-xs w-6 text-right font-mono shrink-0">{originalIndex + 1}.</span>
-                        <span className="font-semibold text-slate-800 text-lg truncate" title={candidate.word}>{candidate.word}</span>
+                        <span className="text-slate-600 text-xs w-6 text-right font-mono shrink-0 group-hover:text-slate-400 transition-colors">{originalIndex + 1}.</span>
+                        <span className="font-bold text-slate-200 text-lg truncate" title={candidate.word}>{candidate.word}</span>
                     </div>
 
                     <div className="flex flex-col items-end shrink-0 ml-2">
-                        <div className="text-xs font-bold text-slate-900 bg-slate-200 px-2 py-0.5 rounded">
+                        <div
+                            className="text-xs font-bold px-2 py-0.5 rounded border border-slate-700 bg-slate-800"
+                            style={{
+                                color: `hsl(${candidate.totalScore * 120}, 70%, 50%)`
+                            }}
+                        >
                             {(candidate.totalScore * 100).toFixed(0)}
                         </div>
                     </div>
@@ -98,14 +103,14 @@ const Row = ({ index, style, candidates, numColumns }: { index: number; style: C
 export default function RhymeResultList({ candidates, layout }: RhymeResultListProps) {
     if (candidates.length === 0) {
         return (
-            <div className="text-slate-400 italic text-sm p-4 text-center">
+            <div className="text-slate-500 italic text-sm p-4 text-center">
                 No rhymes found for this word.
             </div>
         );
     }
 
     return (
-        <div className="h-full w-full min-h-0 flex flex-col">
+        <div className="h-full w-full min-h-0 flex flex-col no-scrollbar">
             <AutoSizer>
                 {({ width, height }) => {
                     const numColumns = (layout === 'grid' && width > 600) ? 2 : 1;
@@ -113,6 +118,7 @@ export default function RhymeResultList({ candidates, layout }: RhymeResultListP
 
                     return (
                         <List<ListData>
+                            className="no-scrollbar"
                             style={{ width, height }}
                             rowCount={rowCount}
                             rowHeight={ITEM_HEIGHT}

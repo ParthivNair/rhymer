@@ -8,7 +8,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', 'system-ui', 'sans-serif'],
+                sans: ['"Courier New"', 'Courier', 'monospace'],
             },
             colors: {
                 // Add some custom premium colors if needed, or rely on defaults

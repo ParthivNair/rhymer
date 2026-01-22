@@ -11,11 +11,22 @@
 
 @layer base {
   body {
-    /* @apply is discouraged in v4, but we can stick to standard css or use @apply if configured. 
-       Actually, standard v4 uses native CSS variables or simple classes. 
-       Let's use @apply if it works, or just classes in App.tsx. 
-       The error `Cannot apply unknown utility class` suggests the theme isn't loading or v4 syntax differences.
-       With @tailwindcss/postcss (v4), we use `@import "tailwindcss";` instead of directives. */
-    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    @apply bg-slate-900 text-slate-200 font-sans antialiased;
+  }
+}
+
+@layer utilities {
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }
