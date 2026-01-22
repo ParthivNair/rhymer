@@ -46,13 +46,28 @@ function App() {
           }
         };
 
-        const [lexicon, perfectIndex, tailIndex] = await Promise.all([
+        const [lexicon, perfectIndex, tailIndex, freqText] = await Promise.all([
           fetchResource('lexicon.json'),
           fetchResource('index_perfect.json'),
           fetchResource('index_tail.json'),
-        ]) as [Lexicon, PerfectIndex, TailIndex];
+          (async () => {
+            const res = await fetch(`${ARTIFACTS_PATH}/frequency_list.txt`);
+            if (!res.ok) return '';
+            return await res.text();
+          })()
+        ]) as [Lexicon, PerfectIndex, TailIndex, string];
 
-        const engine = new RhymeEngine(lexicon, perfectIndex, tailIndex);
+        // Process frequency list
+        const frequencyMap = new Map<string, number>();
+        const lines = freqText.split('\n');
+        lines.forEach((line, index) => {
+          const word = line.trim().toUpperCase();
+          if (word) {
+            frequencyMap.set(word, index);
+          }
+        });
+
+        const engine = new RhymeEngine(lexicon, perfectIndex, tailIndex, frequencyMap);
         setDictState({ loading: false, engine, error: null });
         console.log("Dictionary loaded successfully");
 

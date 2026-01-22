@@ -8,15 +8,18 @@ export class RhymeEngine {
     private perfectIndex: PerfectIndex;
     // @ts-ignore
     private tailIndex: TailIndex;
+    private frequencyMap: Map<string, number>;
 
     constructor(
         lexicon: Lexicon,
         perfectIndex: PerfectIndex,
-        tailIndex: TailIndex
+        tailIndex: TailIndex,
+        frequencyMap?: Map<string, number>
     ) {
         this.lexicon = lexicon;
         this.perfectIndex = perfectIndex;
         this.tailIndex = tailIndex;
+        this.frequencyMap = frequencyMap || new Map();
     }
 
     public compare(req: CompareRequest): CompareResponse {
@@ -44,12 +47,19 @@ export class RhymeEngine {
             const scoreResult = scoreCandidate(word, entry, targetEntries, req.schemes);
 
             if (scoreResult.totalScore >= minScoreThreshold) {
+                // Attach frequency rank (lower is better/more popular)
+                const rank = this.frequencyMap.get(word); // Make sure word case matches map keys
+                scoreResult.frequencyRank = rank !== undefined ? rank : 999999;
                 candidates.push(scoreResult);
             }
         }
 
-        // 3. Sort
-        candidates.sort((a, b) => b.totalScore - a.totalScore);
+        // 3. Sort: Primary by Score (DESC), Secondary by Frequency Rank (ASC)
+        candidates.sort((a, b) => {
+            const scoreDiff = b.totalScore - a.totalScore;
+            if (Math.abs(scoreDiff) > 0.001) return scoreDiff;
+            return (a.frequencyRank || 999999) - (b.frequencyRank || 999999);
+        });
 
         const end = performance.now();
         console.debug(`Comparision took ${(end - start).toFixed(2)}ms for ${candidates.length} candidates.`);

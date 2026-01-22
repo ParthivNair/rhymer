@@ -29,6 +29,7 @@ export interface Candidate {
     totalScore: number;
     schemeScores: Record<string, number>; // { 'perfect': 1.0, 'near': 0.8 }
     breakdown: string[]; // Explanations
+    frequencyRank?: number; // 0 = most common, higher = less common, undefined = unknown
 }
 
 export interface CompareResponse {
