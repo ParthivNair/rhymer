@@ -69,4 +69,52 @@ export class RhymeEngine {
             candidates: candidates.slice(0, limit)
         };
     }
+
+    public checkRhyme(wordA: string, wordB: string): boolean {
+        const w1 = wordA.toUpperCase().trim();
+        const w2 = wordB.toUpperCase().trim();
+
+        if (w1 === w2) return true; // Same word rhymes with itself for highlighting purposes
+
+        // Helper to resolve entry with fuzzy fallback
+        const resolve = (w: string) => {
+            if (this.lexicon[w]) return this.lexicon[w];
+            // Fuzzy 1: "IN" -> "ING"
+            if (w.endsWith("IN")) {
+                const tryIng = w.substring(0, w.length - 2) + "ING";
+                if (this.lexicon[tryIng]) return this.lexicon[tryIng];
+            }
+            return null;
+        };
+
+        const entryA = resolve(w1);
+        const entryB = resolve(w2);
+
+        if (!entryA || !entryB) return false;
+
+        // 1. Check Perfect Rhyme
+        const perfectScore = scoreCandidate(w1, entryA, [entryB], [{ id: 'perfect', weight: 1 }]);
+        if (perfectScore.totalScore === 1.0) return true;
+
+        // 2. Check Near Rhyme (Tail)
+        // Relaxed threshold for highlighting? > 0.5?
+        const nearScore = scoreCandidate(w1, entryA, [entryB], [{ id: 'near', weight: 1 }]);
+        if (nearScore.totalScore >= 0.6) return true;
+
+        // 3. Check Assonance (Internal Rhyme - Stressed Vowel Match)
+        // Find primary stressed vowel in phonemes.
+        // Phonemes format: ["K", "AE1", "T"]
+        const getStressedVowel = (p: string[]) => p.find(ph => ph.includes('1') || ph.includes('2')); // 1=Primary, 2=Secondary? Usually 1.
+
+        const vA = getStressedVowel(entryA.p);
+        const vB = getStressedVowel(entryB.p);
+
+        if (vA && vB) {
+            // Strip stress number for comparison? "AE1" vs "AE2"? Usually exact match for strong assonance.
+            // But let's check exact match first.
+            if (vA === vB) return true;
+        }
+
+        return false;
+    }
 }
