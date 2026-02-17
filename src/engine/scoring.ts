@@ -92,3 +92,23 @@ export function scoreCandidate(
         breakdown: breakdowns
     };
 }
+
+/**
+ * Normalizes a frequency rank into a 0-1 score.
+ * Lower rank (more popular) -> Higher score.
+ *
+ * Formula: 1 / (log10(rank + 1) + 1)
+ * Examples:
+ * Rank 0 -> 1.0
+ * Rank 9 -> 0.5
+ * Rank 99 -> 0.33
+ * Rank 999 -> 0.25
+ * Rank 9999 -> 0.2
+ * Rank 49999 -> 0.17
+ */
+export function computePopularityScore(rank: number): number {
+    if (rank < 0) return 0;
+    // +1 to avoid log(0)
+    // +1 in denominator to ensure max is 1.0 (when rank=0, log10(1)=0 => 1/1 = 1)
+    return 1.0 / (Math.log10(rank + 1) + 1);
+}

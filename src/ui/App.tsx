@@ -1,10 +1,10 @@
-
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { RhymeEngine } from '../engine';
 import type { Candidate, Lexicon, PerfectIndex, TailIndex } from '../engine/types';
 import { InspirationService } from '../engine/InspirationService';
 import RhymeResultList from './components/RhymeResultList';
 import AutoScalingInput from './components/AutoScalingInput';
+import DraftsView from './components/DraftsView';
 
 // Constants
 const BASE_URL = import.meta.env.BASE_URL || '/';
@@ -48,6 +48,9 @@ function App() {
     'bg-rose-900 text-rose-200',
     'bg-indigo-900 text-indigo-200',
   ];
+
+  // View Mode State
+  const [showDrafts, setShowDrafts] = useState(false);
 
   // Load Dictionary on Mount
   useEffect(() => {
@@ -345,20 +348,33 @@ function App() {
         </h1>
         <div className="flex items-center gap-4">
           {/* Mode Switch */}
-          <div className="flex items-center text-xs font-bold text-slate-400 bg-slate-800 rounded-lg p-1 border border-slate-700">
+          {!showDrafts && (
+            <div className="flex items-center text-xs font-bold text-slate-400 bg-slate-800 rounded-lg p-1 border border-slate-700">
+              <button
+                onClick={() => setInspirationMode(false)}
+                className={`px-3 py-1 rounded ${!inspirationMode ? 'bg-slate-600 text-white' : 'hover:text-slate-200'}`}
+              >
+                CLASSIC
+              </button>
+              <button
+                onClick={() => setInspirationMode(true)}
+                className={`px-3 py-1 rounded ${inspirationMode ? 'bg-indigo-600 text-white shadow-lg' : 'hover:text-slate-200'}`}
+              >
+                INSPIRATION
+              </button>
+            </div>
+          )}
+
+          {/* Drafts Button */}
+          {!showDrafts && !inspirationMode && (
             <button
-              onClick={() => setInspirationMode(false)}
-              className={`px-3 py-1 rounded ${!inspirationMode ? 'bg-slate-600 text-white' : 'hover:text-slate-200'}`}
+              onClick={() => setShowDrafts(true)}
+              className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded border border-slate-600 transition-colors"
             >
-              CLASSIC
+              Draft Music
             </button>
-            <button
-              onClick={() => setInspirationMode(true)}
-              className={`px-3 py-1 rounded ${inspirationMode ? 'bg-indigo-600 text-white shadow-lg' : 'hover:text-slate-200'}`}
-            >
-              INSPIRATION
-            </button>
-          </div>
+          )}
+
           <div className="text-sm text-slate-400">v0.1.2</div>
         </div>
       </header>
@@ -382,218 +398,227 @@ function App() {
       {!dictState.loading && !dictState.error && (
         <div className="w-full max-w-6xl border-2 border-slate-700 flex flex-col h-[80vh]">
 
-          {/* Top Control Area */}
-          <div className="p-6 border-b-2 border-slate-700 bg-slate-900 shrink-0 flex flex-col gap-4">
+          {showDrafts ? (
+            <div className="flex-1 min-h-0 p-4">
+              <DraftsView onBack={() => setShowDrafts(false)} />
+            </div>
+          ) : (
+            <>
+              {/* Top Control Area */}
+              <div className="p-6 border-b-2 border-slate-700 bg-slate-900 shrink-0 flex flex-col gap-4">
 
-            {/* INSPIRATION MODE INPUT */}
-            {inspirationMode ? (
-              <div className="flex-1 min-w-0 w-full animate-in fade-in duration-500">
-                {!isHighlighting ? (
-                  /* Step 1: Input */
-                  <div className="flex flex-col gap-6 animate-in fade-in duration-500">
-                    <p className="text-slate-400 font-mono text-lg">
-                      Enter a line to rhyme, and hit enter (e.g. the quick brown fox).
-                    </p>
-                    <div className="relative w-full">
-                      <AutoScalingInput
-                        value={inspirationText}
-                        onChange={setInspirationText}
-                        onEnter={() => setIsHighlighting(true)}
-                      />
-                    </div>
-                    <div className="text-sm text-slate-500">
-                      Hit <span className="text-slate-300 font-bold">Enter</span> to highlight words.
-                    </div>
-                  </div>
-                ) : (
-                  /* Step 2: Highlight */
-                  <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="flex justify-between items-end">
-                      <p className="text-slate-400 font-mono text-sm">
-                        Highlight words you want to rhyme.
-                      </p>
-                      <button
-                        onClick={() => setIsHighlighting(false)}
-                        className="text-xs text-slate-600 hover:text-slate-400 uppercase tracking-widest"
-                      >
-                        Restart
-                      </button>
-                    </div>
-
-                    <div className="flex flex-wrap gap-x-4 gap-y-3 text-3xl font-mono leading-relaxed">
-                      {inspirationText.trim().split(/\s+/).map((word, i) => {
-                        const hasColor = wordColors.has(i);
-                        const displayColorId = wordColors.get(i) || 0;
-                        const colorClass = hasColor
-                          ? HIGHLIGHT_COLORS[displayColorId % HIGHLIGHT_COLORS.length]
-                          : 'text-slate-500 hover:text-slate-300';
-
-                        return (
-                          <span
-                            key={i}
-                            onClick={() => toggleHighlightIndex(i)}
-                            className={`cursor-pointer transition-all duration-200 px-2 rounded-md ${colorClass} ${hasColor ? 'scale-105 font-bold shadow-lg' : ''}`}
+                {/* INSPIRATION MODE INPUT */}
+                {inspirationMode ? (
+                  <div className="flex-1 min-w-0 w-full animate-in fade-in duration-500">
+                    {!isHighlighting ? (
+                      /* Step 1: Input */
+                      <div className="flex flex-col gap-6 animate-in fade-in duration-500">
+                        <p className="text-slate-400 font-mono text-lg">
+                          Enter a line to rhyme, and hit enter (e.g. the quick brown fox).
+                        </p>
+                        <div className="relative w-full">
+                          <AutoScalingInput
+                            value={inspirationText}
+                            onChange={setInspirationText}
+                            onEnter={() => setIsHighlighting(true)}
+                          />
+                        </div>
+                        <div className="text-sm text-slate-500">
+                          Hit <span className="text-slate-300 font-bold">Enter</span> to highlight words.
+                        </div>
+                      </div>
+                    ) : (
+                      /* Step 2: Highlight */
+                      <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="flex justify-between items-end">
+                          <p className="text-slate-400 font-mono text-sm">
+                            Highlight words you want to rhyme.
+                          </p>
+                          <button
+                            onClick={() => setIsHighlighting(false)}
+                            className="text-xs text-slate-600 hover:text-slate-400 uppercase tracking-widest"
                           >
-                            {word}
-                          </span>
-                        );
-                      })}
-                    </div>
+                            Restart
+                          </button>
+                        </div>
 
-                    <div className="flex justify-end mt-4">
-                      <button
-                        onClick={handleGenerateInspiration}
-                        disabled={isGenerating}
-                        className="w-12 h-12 flex items-center justify-center rounded-full bg-transparent text-slate-500 hover:text-slate-100 hover:border hover:border-slate-500 hover:bg-slate-800/50 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="GO"
-                      >
-                        {isGenerating ? '...' : 'GO'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* CLASSIC MODE INPUT */
-              <div className="flex flex-col-reverse md:flex-row gap-6">
-                <div className="flex-1 min-w-0 w-full md:w-auto">
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {targets.map(t => (
-                      <span key={t} className="inline-flex items-center px-3 py-1 text-sm font-medium bg-slate-800 text-slate-200 border border-slate-600">
-                        {t}
-                        <button onClick={() => removeTarget(t)} className="ml-2 text-slate-400 hover:text-white">
-                          &times;
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-
-                  <input
-                    type="text"
-                    className="w-full text-lg px-4 py-3 bg-slate-800 text-slate-100 border-2 border-slate-700 focus:outline-none focus:border-slate-400 transition-colors placeholder-slate-500"
-                    placeholder="Type a word and hit Enter (e.g. 'cat', 'bat')"
-                    value={inputValue}
-                    onChange={e => setInputValue(e.target.value)}
-                    onKeyDown={handleInputKeyDown}
-                    autoFocus
-                  />
-                  <p className="text-xs text-slate-500 mt-2 ml-1">
-                    Add multiple words to see separate lists of rhymes for each.
-                  </p>
-                </div>
-
-                {/* Info Box (was placeholder) */}
-                <div className="hidden md:flex flex-col justify-center text-right text-slate-500 text-sm w-1/3">
-                  <p>Switch to <strong>Inspiration Mode</strong> to generate full rhyming lines using AI.</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Visualization / Results Area */}
-          <div className="overflow-x-auto overflow-y-hidden flex-1 p-2 flex flex-col min-h-0 bg-slate-900/50">
-
-            {inspirationMode ? (
-              /* INSPIRATION RESULTS */
-              <div className="h-full w-full flex flex-col items-center p-8 overflow-y-auto no-scrollbar">
-                {isGenerating && (
-                  <div className="flex flex-col items-center gap-4 mt-24 opacity-70">
-                    <div className="text-slate-400 font-mono text-sm tracking-widest animate-pulse">
-                      AWAITING RESPONSE{loadingDots}
-                    </div>
-                  </div>
-                )}
-
-                {!isGenerating && inspirationLines.length > 0 && (
-                  <div className="w-full max-w-4xl space-y-6 mt-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                    {inspirationLines.map((line, idx) => (
-                      <div key={idx} className="flex gap-6 items-baseline group w-full">
-                        <span className="text-xs text-slate-700 pt-2 font-mono shrink-0 select-none">
-                          {(idx + 1).toString().padStart(2, '0')}
-                        </span>
-                        <p className="text-2xl text-slate-300 font-mono leading-relaxed hover:text-white transition-colors cursor-text selection:bg-pink-500/30 break-words w-full">
-                          {line.split(/\s+/).map((word, wIdx) => {
-                            // Highlighting Logic
-                            const cleanFn = (w: string) => w.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").toLowerCase();
-                            const cleanOut = cleanFn(word);
-
-                            const matchId = outputRhymeMap.get(cleanOut);
-                            const matchedColorId = matchId !== undefined ? matchId : -1;
-
-                            const colorClass = matchedColorId !== -1
-                              ? HIGHLIGHT_COLORS[matchedColorId % HIGHLIGHT_COLORS.length]
-                              : '';
+                        <div className="flex flex-wrap gap-x-4 gap-y-3 text-3xl font-mono leading-relaxed">
+                          {inspirationText.trim().split(/\s+/).map((word, i) => {
+                            const hasColor = wordColors.has(i);
+                            const displayColorId = wordColors.get(i) || 0;
+                            const colorClass = hasColor
+                              ? HIGHLIGHT_COLORS[displayColorId % HIGHLIGHT_COLORS.length]
+                              : 'text-slate-500 hover:text-slate-300';
 
                             return (
-                              <>
-                                <span key={wIdx} className={`${colorClass} ${matchedColorId !== -1 ? 'rounded-md px-1 -mx-1 transition-colors box-decoration-clone' : ''}`}>
-                                  {word}
-                                </span>{' '}
-                              </>
+                              <span
+                                key={i}
+                                onClick={() => toggleHighlightIndex(i)}
+                                className={`cursor-pointer transition-all duration-200 px-2 rounded-md ${colorClass} ${hasColor ? 'scale-105 font-bold shadow-lg' : ''}`}
+                              >
+                                {word}
+                              </span>
                             );
                           })}
-                        </p>
+                        </div>
+
+                        <div className="flex justify-end mt-4">
+                          <button
+                            onClick={handleGenerateInspiration}
+                            disabled={isGenerating}
+                            className="w-12 h-12 flex items-center justify-center rounded-full bg-transparent text-slate-500 hover:text-slate-100 hover:border hover:border-slate-500 hover:bg-slate-800/50 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="GO"
+                          >
+                            {isGenerating ? '...' : 'GO'}
+                          </button>
+                        </div>
                       </div>
-                    ))}
-                    <div className="pt-12 text-center text-slate-600 text-xs uppercase tracking-widest">
-                      End of suggestions
+                    )}
+                  </div>
+                ) : (
+                  /* CLASSIC MODE INPUT */
+                  <div className="flex flex-col-reverse md:flex-row gap-6">
+                    <div className="flex-1 min-w-0 w-full md:w-auto">
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {targets.map(t => (
+                          <span key={t} className="inline-flex items-center px-3 py-1 text-sm font-medium bg-slate-800 text-slate-200 border border-slate-600">
+                            {t}
+                            <button onClick={() => removeTarget(t)} className="ml-2 text-slate-400 hover:text-white">
+                              &times;
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+
+                      <input
+                        type="text"
+                        className="w-full text-lg px-4 py-3 bg-slate-800 text-slate-100 border-2 border-slate-700 focus:outline-none focus:border-slate-400 transition-colors placeholder-slate-500"
+                        placeholder="Type a word and hit Enter (e.g. 'cat', 'bat')"
+                        value={inputValue}
+                        onChange={e => setInputValue(e.target.value)}
+                        onKeyDown={handleInputKeyDown}
+                        autoFocus
+                      />
+                      <p className="text-xs text-slate-500 mt-2 ml-1">
+                        Add multiple words to see separate lists of rhymes for each.
+                      </p>
+                    </div>
+
+                    {/* Info Box */}
+                    <div className="hidden md:flex flex-col justify-center text-right text-slate-500 text-sm w-1/3">
+                      <p>Switch to <strong>Inspiration Mode</strong> to generate full rhyming lines using AI.</p>
                     </div>
                   </div>
                 )}
               </div>
-            ) : (
-              /* CLASSIC RESULTS */
-              <>
-                {resultSets.length === 0 && targets.length > 0 && (
-                  <div className="p-10 text-center text-slate-400">
-                    No rhymes found. Try simpler words?
-                  </div>
-                )}
 
-                {resultSets.length === 0 && targets.length === 0 && (
-                  <div className="p-10 text-center text-slate-300 italic">
-                    Waiting for input...
-                  </div>
-                )}
+              {/* Visualization / Results Area */}
+              <div className="overflow-x-auto overflow-y-hidden flex-1 p-2 flex flex-col min-h-0 bg-slate-900/50">
 
-                <div className={`
-                    h-full
-                    ${resultSets.length === 1 ? 'w-full' : 'flex gap-4'}
-                  `}>
-                  {resultSets.map((set) => (
-                    <div
-                      key={set.target}
-                      className={`
-                          flex flex-col h-full min-h-0
-                          ${resultSets.length === 1 ? 'w-full' : 'w-80 min-w-[300px] border-r last:border-r-0 border-slate-100 pr-2'}
-                        `}
-                    >
-                      {/* Column Header only if multiple */}
-                      {resultSets.length > 1 && (
-                        <div className="mb-2 px-1 text-sm font-bold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">
-                          Rhymes for "{set.target}"
+                {inspirationMode ? (
+                  /* INSPIRATION RESULTS */
+                  <div className="h-full w-full flex flex-col items-center p-8 overflow-y-auto no-scrollbar">
+                    {isGenerating && (
+                      <div className="flex flex-col items-center gap-4 mt-24 opacity-70">
+                        <div className="text-slate-400 font-mono text-sm tracking-widest animate-pulse">
+                          AWAITING RESPONSE{loadingDots}
                         </div>
-                      )}
-
-                      <div className="flex-1 min-h-0">
-                        <RhymeResultList
-                          candidates={set.candidates}
-                          layout={resultSets.length === 1 ? 'grid' : 'list'}
-                        />
                       </div>
+                    )}
+
+                    {!isGenerating && inspirationLines.length > 0 && (
+                      <div className="w-full max-w-4xl space-y-6 mt-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                        {inspirationLines.map((line, idx) => (
+                          <div key={idx} className="flex gap-6 items-baseline group w-full">
+                            <span className="text-xs text-slate-700 pt-2 font-mono shrink-0 select-none">
+                              {(idx + 1).toString().padStart(2, '0')}
+                            </span>
+                            <p className="text-2xl text-slate-300 font-mono leading-relaxed hover:text-white transition-colors cursor-text selection:bg-pink-500/30 break-words w-full">
+                              {line.split(/\s+/).map((word, wIdx) => {
+                                // Highlighting Logic
+                                const cleanFn = (w: string) => w.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").toLowerCase();
+                                const cleanOut = cleanFn(word);
+
+                                const matchId = outputRhymeMap.get(cleanOut);
+                                const matchedColorId = matchId !== undefined ? matchId : -1;
+
+                                const colorClass = matchedColorId !== -1
+                                  ? HIGHLIGHT_COLORS[matchedColorId % HIGHLIGHT_COLORS.length]
+                                  : '';
+
+                                return (
+                                  <span key={wIdx}>
+                                    <span className={`${colorClass} ${matchedColorId !== -1 ? 'rounded-md px-1 -mx-1 transition-colors box-decoration-clone' : ''}`}>
+                                      {word}
+                                    </span>{' '}
+                                  </span>
+                                );
+                              })}
+                            </p>
+                          </div>
+                        ))}
+                        <div className="pt-12 text-center text-slate-600 text-xs uppercase tracking-widest">
+                          End of suggestions
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* CLASSIC RESULTS */
+                  <>
+                    {resultSets.length === 0 && targets.length > 0 && (
+                      <div className="p-10 text-center text-slate-400">
+                        No rhymes found. Try simpler words?
+                      </div>
+                    )}
+
+                    {resultSets.length === 0 && targets.length === 0 && (
+                      <div className="p-10 text-center text-slate-300 italic">
+                        Waiting for input...
+                      </div>
+                    )}
+
+                    <div className={`
+                        h-full
+                        ${resultSets.length === 1 ? 'w-full' : 'flex gap-4'}
+                      `}>
+                      {resultSets.map((set) => (
+                        <div
+                          key={set.target}
+                          className={`
+                              flex flex-col h-full min-h-0
+                              ${resultSets.length === 1 ? 'w-full' : 'w-80 min-w-[300px] border-r last:border-r-0 border-slate-100 pr-2'}
+                            `}
+                        >
+                          {/* Column Header only if multiple */}
+                          {resultSets.length > 1 && (
+                            <div className="mb-2 px-1 text-sm font-bold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">
+                              Rhymes for "{set.target}"
+                            </div>
+                          )}
+
+                          <div className="flex-1 min-h-0">
+                            <RhymeResultList
+                              candidates={set.candidates}
+                              layout={resultSets.length === 1 ? 'grid' : 'list'}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </>
-            )}
+                  </>
+                )}
 
-          </div>
+              </div>
 
-          {/* Footer Stats */}
-          <div className="px-6 py-2 bg-slate-900 border-t-2 border-slate-700 text-xs text-slate-500 flex justify-between">
-            <span>Lexicon: {Object.keys(dictState.engine?.['lexicon'] || {}).length.toLocaleString()} words</span>
-            <span>{inspirationMode ? 'Mode: Creative (AI)' : 'Mode: Strict (Engine)'}</span>
-          </div>
+              {/* Footer Stats */}
+              <div className="px-6 py-2 bg-slate-900 border-t-2 border-slate-700 text-xs text-slate-500 flex justify-between">
+                <span>Lexicon: {Object.keys(dictState.engine?.['lexicon'] || {}).length.toLocaleString()} words</span>
+                <span>{inspirationMode ? 'Mode: Creative (AI)' : 'Mode: Strict (Engine)'}</span>
+              </div>
+            </>
+          )}
+
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 
 import type { Lexicon, PerfectIndex, TailIndex, CompareRequest, CompareResponse, Candidate } from './types';
-import { scoreCandidate } from './scoring';
+import { scoreCandidate, computePopularityScore } from './scoring';
 
 export class RhymeEngine {
     private lexicon: Lexicon;
@@ -50,12 +50,28 @@ export class RhymeEngine {
                 // Attach frequency rank (lower is better/more popular)
                 const rank = this.frequencyMap.get(word); // Make sure word case matches map keys
                 scoreResult.frequencyRank = rank !== undefined ? rank : 999999;
+
+                // Calculate Popularity Score (0-1)
+                scoreResult.popularityScore = computePopularityScore(scoreResult.frequencyRank);
+
+                // Calculate Composite Score
+                // Weight Phonetic Score higher (e.g. 0.85) vs Popularity (0.15)
+                // This allows a perfect rhyme (1.0) to likely beat a near rhyme (0.8) even if popular.
+                // But a very popular near rhyme might edge out a terrible obscure rhyme.
+                const weightPhonetic = 0.85;
+                const weightPopularity = 0.15;
+
+                scoreResult.compositeScore = (scoreResult.totalScore * weightPhonetic) + (scoreResult.popularityScore * weightPopularity);
+
                 candidates.push(scoreResult);
             }
         }
 
-        // 3. Sort: Primary by Score (DESC), Secondary by Frequency Rank (ASC)
+        // 3. Sort: Primary by Composite Score (DESC)
         candidates.sort((a, b) => {
+            const compDiff = (b.compositeScore || 0) - (a.compositeScore || 0);
+            if (Math.abs(compDiff) > 0.001) return compDiff;
+
             const scoreDiff = b.totalScore - a.totalScore;
             if (Math.abs(scoreDiff) > 0.001) return scoreDiff;
             return (a.frequencyRank || 999999) - (b.frequencyRank || 999999);
